@@ -1,6 +1,6 @@
 // Configuration
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-const HEARTBEAT_ENDPOINT = process.env.WEBHOOK || 'https://api.example.com/heartbeat'; // Using environment variable WEBHOOK
+const HEARTBEAT_ENDPOINT = 'https://webhook.site/88bf0901-e240-4268-989d-59d472acb110'; // Using environment variable WEBHOOK
 
 // DOM Elements
 const statusIndicator = document.getElementById('statusIndicator');
