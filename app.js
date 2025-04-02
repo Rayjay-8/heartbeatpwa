@@ -1,6 +1,6 @@
 // Configuration
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-const HEARTBEAT_ENDPOINT = 'https://api.example.com/heartbeat'; // Replace with your actual endpoint
+const HEARTBEAT_ENDPOINT = process.env.WEBHOOK || 'https://api.example.com/heartbeat'; // Using environment variable WEBHOOK
 
 // DOM Elements
 const statusIndicator = document.getElementById('statusIndicator');
@@ -23,6 +23,35 @@ function formatTimestamp(timestamp) {
     if (!timestamp) return 'Never';
     return new Date(timestamp).toLocaleString();
 }
+
+// Listen for messages from service worker
+navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data.type === 'heartbeat') {
+        lastHeartbeatTime = new Date(event.data.timestamp);
+        lastHeartbeatElement.textContent = `Last heartbeat: ${formatTimestamp(lastHeartbeatTime)}`;
+        updateConnectionStatus(event.data.status === 'success');
+    }
+});
+
+// Initialize the app
+function initApp() {
+    // Initial connection check
+    updateConnectionStatus(navigator.onLine);
+
+    // Set up event listeners for online/offline events
+    window.addEventListener('online', () => updateConnectionStatus(true));
+    window.addEventListener('offline', () => updateConnectionStatus(false));
+
+    // Register for background sync if supported
+    if ('serviceWorker' in navigator && 'sync' in window.registration) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.sync.register('heartbeat-sync');
+        });
+    }
+}
+
+// Start the app when the page loads
+window.addEventListener('load', initApp);
 
 // Send heartbeat to server
 async function sendHeartbeat() {
